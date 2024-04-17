@@ -32,13 +32,14 @@ for i = 1:numel(organoid_mask_files)
         overlappingNuclei = cell(1, numOrganoids);
 
         % Calculate region properties for the organoid mask
-        organoid_data = regionprops(organoid_mask, 'all')
+        
 
         % Loop through each organoid
         for j = 1:numOrganoids
             % Check for overlap between the current organoid mask and nuclei
-            overlapping_pixels = nuclei_mask & (organoid_mask == j);
-            
+            current_organoid = organoid_mask == j;
+            overlapping_pixels = nuclei_mask & current_organoid;
+            organoid_data = regionprops(current_organoid, 'all');
             % If there are overlapping pixels, store the nucleus mask
             if any(overlapping_pixels(:))
                 % Store overlapping nuclei for the current organoid
