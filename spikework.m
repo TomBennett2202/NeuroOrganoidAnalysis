@@ -34,6 +34,7 @@ for i = 1:numel(organoid_mask_files)
         % Initialize a cell array to store region properties for each organoid in this file
         regionprops_cell = cell(1, 0);
         
+        % Initialize a counter for labeling organoids
         organoid_counter = 0;
 
         % Initialize a new mask to accumulate all organoids
@@ -41,11 +42,9 @@ for i = 1:numel(organoid_mask_files)
 
         % Loop through each organoid
         for j = 1:numOrganoids
-            % Check for overlap between the current organoid mask and nuclei
-            current_organoid = (organoid_mask == j);
         
             % Remove objects touching the border
-            cleared_current_organoid_mask = imclearborder(current_organoid);
+            cleared_current_organoid_mask = imclearborder(organoid_mask == j);
         
             if ~all(cleared_current_organoid_mask(:) == 0) 
                 organoid_counter = organoid_counter + 1;
@@ -56,12 +55,9 @@ for i = 1:numel(organoid_mask_files)
                 % Update the new mask with the relabeled organoid
                 new_organoid_mask(relabeled_organoid_mask > 0) = organoid_counter;
 
-
-                % Update the current organoid mask
-                current_organoid = cleared_current_organoid_mask;
-        
-                overlapping_pixels = nuclei_mask & current_organoid;
-        
+                % Check for overlap between the current organoid mask and nuclei
+                overlapping_pixels = nuclei_mask & cleared_current_organoid_mask;
+       
                 overlapping_nuclei = nuclei_mask .* uint16(overlapping_pixels);
         
                 nonoverlapping_nuclei = nuclei_mask .* uint16(imcomplement(overlapping_pixels));
@@ -70,16 +66,16 @@ for i = 1:numel(organoid_mask_files)
                 if any(overlapping_pixels(:))
                     relabeled_nuclei_combined = zeros(size(nuclei_mask));
                     for label = unique(overlapping_nuclei(:))'
-                        if label ~= 0
+                        if label ~= 0 && ~any(label == nonoverlapping_nuclei(:))
                             % Threshold the nucleus individually
                             nucleus_thresholded = overlapping_nuclei == label;
-        
+                    
                             % Label the thresholded nucleus
                             labeled_nucleus = bwlabel(nucleus_thresholded);
-        
+                    
                             % Increment the labels so that they restart from 1 for each organoid
                             labeled_nucleus(labeled_nucleus > 0) = labeled_nucleus(labeled_nucleus > 0) + max(relabeled_nuclei_combined(:));
-        
+                    
                             % Add the relabeled nucleus to the combined image
                             relabeled_nuclei_combined = relabeled_nuclei_combined + labeled_nucleus;
                         end
