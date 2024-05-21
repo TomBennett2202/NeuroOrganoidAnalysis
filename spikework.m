@@ -16,7 +16,7 @@ nuclei_mask_files = dir(fullfile(nuclei_directory, '*.png'));
 organoid_image_files = dir(fullfile(organoid_directory, '*.jpg'));
 
 % Load magnification data from the CSV file
-magnification_data = readtable('magnifications.csv');
+magnification_data = readtable('/Users/tombennett/Desktop/magnifications.csv');
 
 % Initialize a structure to store region properties for each file
 all_regionprops = struct();
@@ -150,20 +150,20 @@ for i = 1:numel(organoid_mask_files)
 end
 
 
-
-
-% correlations(all_regionprops);
-
-
 [combined_nuclei_data, combined_data_excluded, combined_table] = combining(all_regionprops);
 
-organoidvsnucleicorrelation(combined_table);
+% correlationAnalysis(combined_nuclei_data, 'nuclei');
+% 
+% correlationAnalysis(combined_data_excluded, 'organoid');
+% 
+% organoidvsnucleicorrelation(combined_table);
 
 
-nucleicorrelation(combined_nuclei_data);
-
-
-organoidcorrelation(combined_data_excluded);
+% performPCA(combined_nuclei_data, 'nuclei');
+% 
+% performPCA(combined_data_excluded, 'organoid');
+% 
+% performPCA(combined_table, 'both');
 
 
 
