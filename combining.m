@@ -14,30 +14,27 @@ function [combined_nuclei_data, combined_data_excluded, combined_table] = combin
     
     % For each field
     for i = 1:length(fields)
-        % Check if the field contains the desired data
-        if isfield(all_regionprops.(fields{i}), 'organoid_data')
-            % If yes, extract the data and store it in the cell array
-            data_cell{i} = all_regionprops.(fields{i}).organoid_data;
-            
-            % Extract the regionprops data for the current field
-            regionprops_data = all_regionprops.(fields{i}).organoid_regionprops;
-            
-            % Initialize a temporary cell array to store mean values for the current field
-            temp_mean_values_cell = cell(1, numel(regionprops_data));
-            
-            % For each table in regionprops data
-            for j = 1:numel(regionprops_data)
-                % Exclude the second column
-                table_data = regionprops_data{j}(:, columns_of_interest);
-                % Append the table to combined_nuclei_data
-                combined_nuclei_data = [combined_nuclei_data; table_data];
-                % Calculate mean for each column of interest
-                temp_mean_values_cell{j} = mean(table_data, 1);
-            end
-            
-            % Store the mean values for the current field in the main mean_values_cell
-            mean_values_cell = [mean_values_cell, temp_mean_values_cell];
+        % If yes, extract the data and store it in the cell array
+        data_cell{i} = all_regionprops.(fields{i}).organoid_data;
+        
+        % Extract the regionprops data for the current field
+        regionprops_data = all_regionprops.(fields{i}).organoid_regionprops;
+        
+        % Initialize a temporary cell array to store mean values for the current field
+        temp_mean_values_cell = cell(1, numel(regionprops_data));
+        
+        % For each table in regionprops data
+        for j = 1:numel(regionprops_data)
+            % Exclude the second column
+            table_data = regionprops_data{j}(:, columns_of_interest);
+            % Append the table to combined_nuclei_data
+            combined_nuclei_data = [combined_nuclei_data; table_data];
+            % Calculate mean for each column of interest
+            temp_mean_values_cell{j} = mean(table_data, 1);
         end
+        
+        % Store the mean values for the current field in the main mean_values_cell
+        mean_values_cell = [mean_values_cell, temp_mean_values_cell];
     end
     
     % Concatenate the data from all fields
@@ -53,6 +50,8 @@ function [combined_nuclei_data, combined_data_excluded, combined_table] = combin
     combined_data_excluded.Properties.VariableNames = new_column_names_combined_data;
     new_column_names_combined_mean = strcat('Nuclei_', combined_mean_values.Properties.VariableNames);
     combined_mean_values.Properties.VariableNames = new_column_names_combined_mean;
+    new_column_names_combined_nuclei = strcat('Nuclei_', combined_nuclei_data.Properties.VariableNames);
+    combined_nuclei_data.Properties.VariableNames = new_column_names_combined_nuclei;
     
     % Join the two tables
     combined_table = horzcat(combined_data_excluded, combined_mean_values);

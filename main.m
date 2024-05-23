@@ -30,18 +30,20 @@ for i = 1:numel(organoid_mask_files)
         
         % Read the organoid mask image
         organoid_mask = imread(fullfile(organoid_directory, organoid_mask_files(i).name));
+
+        relabeled_organoid_mask = relabelMask(organoid_mask);
         
         % Read the corresponding nuclei mask image
         nuclei_mask = imread(fullfile(nuclei_directory, organoid_mask_files(i).name));
 
         % Read the corresponding original image
-        current_image = imread(fullfile(organoid_directory, organoid_image_files(i).name));        
+        current_image = imread(fullfile(organoid_directory, organoid_image_files(i).name));
 
         % Store the region properties for the entire organoid mask under the file name field
         all_regionprops.(filename).image = current_image;
         
         % Extract the number of organoids
-        numOrganoids = max(organoid_mask(:));
+        numOrganoids = max(relabeled_organoid_mask(:));
 
         % Find magnification for the current image
         magnification_idx = strcmp(magnification_data.Filename, filename);
@@ -49,98 +51,80 @@ for i = 1:numel(organoid_mask_files)
 
         % Initialize a cell array to store region properties for each organoid in this file
         regionprops_cell = cell(1, 0);
-        
-        % Initialize a counter for labeling organoids
-        organoid_counter = 0;
-
-        % Initialize a new mask to accumulate all organoids
-        new_organoid_mask = zeros(size(organoid_mask));
 
         numNuclei = [];
 
+        lumen_organoids = lumenSelection(current_image, relabeled_organoid_mask);
+
         % Loop through each organoid
-        for j = 1:numOrganoids
-        
-            % Remove objects touching the border
-            cleared_current_organoid_mask = imclearborder(organoid_mask == j);
-        
-            if ~all(cleared_current_organoid_mask(:) == 0) 
-                organoid_counter = organoid_counter + 1;
+        for j = 1:numOrganoids   
+            % Check for overlap between the current organoid mask and nuclei
+            overlapping_pixels = nuclei_mask & (relabeled_organoid_mask == j);
+   
+            overlapping_nuclei = uint16(nuclei_mask) .* uint16(overlapping_pixels);
+    
+            nonoverlapping_nuclei = nuclei_mask .* uint16(imcomplement(overlapping_pixels));
+    
+            % If there are overlapping pixels, relabel them
+            if any(overlapping_pixels(:))
+                nucleus_positions = [];
+                relabeled_nuclei_combined = zeros(size(nuclei_mask));
+                for label = unique(overlapping_nuclei(:))'
+                    if label ~= 0 && ~any(label == nonoverlapping_nuclei(:))
+                        % Threshold the nucleus individually
+                        nucleus_thresholded = overlapping_nuclei == label;
+                        
+                        % Label the thresholded nucleus with small
+                        % objects removed
+                        labeled_nucleus = bwlabel(bwareaopen(nucleus_thresholded, 3));
                 
-                % Relabel the current organoid mask
-                relabeled_organoid_mask = bwlabel(cleared_current_organoid_mask);
-                
-                % Update the new mask with the relabeled organoid
-                new_organoid_mask(relabeled_organoid_mask > 0) = organoid_counter;
+                        % Increment the labels so that they restart from 1 for each organoid
+                        labeled_nucleus(labeled_nucleus > 0) = labeled_nucleus(labeled_nucleus > 0) + max(relabeled_nuclei_combined(:));
 
-                % Check for overlap between the current organoid mask and nuclei
-                overlapping_pixels = nuclei_mask & cleared_current_organoid_mask;
-       
-                overlapping_nuclei = uint16(nuclei_mask) .* uint16(overlapping_pixels);
-        
-                nonoverlapping_nuclei = nuclei_mask .* uint16(imcomplement(overlapping_pixels));
-        
-                % If there are overlapping pixels, calculate region properties
-                if any(overlapping_pixels(:))
-                    nucleus_positions = [];
-                    relabeled_nuclei_combined = zeros(size(nuclei_mask));
-                    for label = unique(overlapping_nuclei(:))'
-                        if label ~= 0 && ~any(label == nonoverlapping_nuclei(:))
-                            % Threshold the nucleus individually
-                            nucleus_thresholded = overlapping_nuclei == label;
-                            
-                            % Label the thresholded nucleus with small
-                            % objects removed
-                            labeled_nucleus = bwlabel(bwareaopen(nucleus_thresholded, 3));
-                    
-                            % Increment the labels so that they restart from 1 for each organoid
-                            labeled_nucleus(labeled_nucleus > 0) = labeled_nucleus(labeled_nucleus > 0) + max(relabeled_nuclei_combined(:));
-
-                            % Add the relabeled nucleus to the combined image
-                            relabeled_nuclei_combined = relabeled_nuclei_combined + labeled_nucleus;
-                            
-                        end
+                        % Add the relabeled nucleus to the combined image
+                        relabeled_nuclei_combined = relabeled_nuclei_combined + labeled_nucleus;
+                        
                     end
-                    % Calculate centroid of the organoid
-                    organoid_props = regionprops(relabeled_organoid_mask, 'Centroid', 'MinorAxisLength');
-                    organoid_centroid = organoid_props.Centroid;
-                    organoid_minor_axis = organoid_props.MinorAxisLength / 2;
-
-                    % Calculate region properties for the current organoid mask
-                    regionprops_data = regionprops('table', relabeled_nuclei_combined, imadjust(current_image(:,:,3)), 'Area', 'Centroid', 'Eccentricity', 'Circularity', 'Solidity', 'MeanIntensity');
-
-                    % Calculate distances between nucleus centroids and organoid centroid
-                    distance_to_centroid = sqrt(sum((regionprops_data.Centroid - organoid_centroid).^2, 2));
-
-                    % Normalize the distance by dividing it by the radius of the organoid
-                    normalized_distance = distance_to_centroid / organoid_minor_axis;
-        
-                    % Add distances column to the regionprops data table
-                    regionprops_data.Distance_From_Centroid = normalized_distance;
-
-                    % Convert area and distance measurements to micrometers
-                    conversion_factor = 1 / magnification; 
-                    regionprops_data.Area = regionprops_data.Area * conversion_factor^2; 
-                    regionprops_data.Distance_From_Centroid = regionprops_data.Distance_From_Centroid * conversion_factor;
-
-
-        
-                    % Store the region properties for the current organoid
-                    regionprops_cell{organoid_counter} = regionprops_data;
                 end
+                % Calculate centroid of the organoid
+                organoid_props = regionprops(relabeled_organoid_mask == j, 'Centroid', 'MinorAxisLength');
+                organoid_centroid = organoid_props.Centroid;
+                organoid_minor_axis = organoid_props.MinorAxisLength / 2;
 
-                numNuclei = [numNuclei; max(relabeled_nuclei_combined(:))];
+                % Calculate region properties for the current organoid mask
+                regionprops_data = regionprops('table', relabeled_nuclei_combined, imadjust(current_image(:,:,3)), 'Area', 'Centroid', 'Eccentricity', 'Circularity', 'Solidity', 'MeanIntensity');
 
+                % Calculate distances between nucleus centroids and organoid centroid
+                distance_to_centroid = sqrt(sum((regionprops_data.Centroid - organoid_centroid).^2, 2));
+
+                % Normalize the distance by dividing it by the radius of the organoid
+                normalized_distance = distance_to_centroid / organoid_minor_axis;
+    
+                % Add distances column to the regionprops data table
+                regionprops_data.Distance_From_Centroid = normalized_distance;
+
+                % Convert area and distance measurements to micrometers
+                conversion_factor = 1 / magnification; 
+                regionprops_data.Area = regionprops_data.Area * conversion_factor^2; 
+                regionprops_data.Distance_From_Centroid = regionprops_data.Distance_From_Centroid * conversion_factor;
+    
+                % Store the region properties for the current organoid
+                regionprops_cell{j} = regionprops_data;
             end
+
+            numNuclei = [numNuclei; max(relabeled_nuclei_combined(:))];
         end
 
         % Calculate region properties for the entire organoid mask
-        organoid_data = regionprops('table', new_organoid_mask, imadjust(current_image(:,:,2)), 'Area', 'Centroid', 'Eccentricity', 'Circularity', 'Solidity', 'MeanIntensity');
+        organoid_data = regionprops('table', relabeled_organoid_mask, imadjust(current_image(:,:,2)), 'Area', 'Centroid', 'Eccentricity', 'Circularity', 'Solidity', 'MeanIntensity');
 
         % Convert area measurements to micrometers
         organoid_data.Area = organoid_data.Area * conversion_factor^2;
 
         organoid_data.Number_Of_Nuclei = numNuclei;
+
+        % Add lumen classification
+        organoid_data.Lumen_Classification = ismember(1:numOrganoids, lumen_organoids)';
 
         % Store the region properties for the entire organoid mask under the file name field
         all_regionprops.(filename).organoid_data = organoid_data;
@@ -152,19 +136,20 @@ end
 
 [combined_nuclei_data, combined_data_excluded, combined_table] = combining(all_regionprops);
 
-% correlationAnalysis(combined_nuclei_data, 'nuclei');
-% 
-% correlationAnalysis(combined_data_excluded, 'organoid');
-% 
-% organoidvsnucleicorrelation(combined_table);
+correlationAnalysis(combined_nuclei_data, 'nuclei');
 
+correlationAnalysis(combined_data_excluded, 'organoid');
 
+organoidvsnucleicorrelation(combined_table);
+% 
+% 
 % performPCA(combined_nuclei_data, 'nuclei');
 % 
 % performPCA(combined_data_excluded, 'organoid');
 % 
 % performPCA(combined_table, 'both');
 
+% Display the image with the outlines of the organoids
 
 
 

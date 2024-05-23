@@ -12,7 +12,7 @@ function organoidvsnucleicorrelation(combined_table)
     
     % Get variable names for organoids and nuclei
     organoid_vars = combined_table.Properties.VariableNames(1:6);
-    nuclei_vars = combined_table.Properties.VariableNames(7:end);
+    nuclei_vars = combined_table.Properties.VariableNames(8:end);
     
     % Pairwise correlations for combined_table
     for i = 1:numel(organoid_vars)

@@ -11,6 +11,11 @@ function correlationAnalysis(data, label)
     
     % Get variable names for the data
     vars = data.Properties.VariableNames;
+
+     % Check if there is a 7th column (lumen_classification) and exclude it
+    if numel(vars) >= 7 && strcmp(vars{7}, 'Organoid_Lumen_Classification')
+        vars = vars([1:6, 8:end]);
+    end
     
     % Pairwise correlations
     for i = 1:numel(vars)
@@ -48,7 +53,7 @@ function correlationAnalysis(data, label)
             
             % Save the figure
             if strcmp(label, 'nuclei')
-                saveas(fig, fullfile(folder_name, sprintf('Nuclei_%s_vs_Nuclei_%s.png', vars{i}, vars{j})));
+                saveas(fig, fullfile(folder_name, sprintf('%s_vs_%s.png', vars{i}, vars{j})));
             elseif strcmp(label, 'organoid')
                 saveas(fig, fullfile(folder_name, sprintf('%s_vs_%s.png', vars{i}, vars{j})));
             end
