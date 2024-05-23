@@ -1,4 +1,4 @@
-function Mask3 = relabelMask(organoid_mask)
+function Mask3 = removeBorders(organoid_mask)
     Mask2 = organoid_mask;
     Mask2(ismember(organoid_mask, union(organoid_mask(:, [1 end]), organoid_mask([1 end], :)))) = 0;
     Mask3 = Mask2 * 0;
