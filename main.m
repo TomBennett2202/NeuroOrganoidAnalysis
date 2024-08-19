@@ -65,28 +65,31 @@ for file_number = 1:numel(image_files)
 
 end
 
+
 combining;
 
 
 % % % % % % % % Exploratory Data Analysis and Visualisation % % % % % % % %
 
-% % % Plot correlation graphs
-% correlationAnalysis(combined_nuclei_data, 'nuclei');
-% 
-% correlationAnalysis(combined_organoid_data, 'organoid');
-% 
-% correlationAnalysis(average_table, 'combined');
-% 
-% % Plot PCA plots
-% performPCA(combined_nuclei_data, 'nuclei');
-% 
-% performPCA(combined_organoid_data, 'organoid');
-% 
-% performPCA(average_table, 'both');
-% 
+% % Plot correlation graphs
+correlationAnalysis(combined_nuclei_data, 'nuclei');
+
+correlationAnalysis(combined_organoid_data, 'organoid');
+
+correlationAnalysis(average_table, 'combined');
+
+% Plot PCA plots
+performPCA(combined_nuclei_data, 'nuclei');
+
+performPCA(combined_organoid_data, 'organoid');
+
+performPCA(average_table, 'both');
+
 % Plot swarm plots comparing lumen organoids vs without
-% lumenPlot(combined_organoid_data);
-% 
-% lumenPlot(combined_nuclei_data);
-% 
-% mitoticPlot(combined_nuclei_data)
+lumenPlot(combined_organoid_data);
+
+lumenPlot(combined_nuclei_data);
+
+% Plot swarm plots comparing mitotic nuclei, non-mitotic nuclei, and
+% miscellaneous objects 
+mitoticPlot(combined_nuclei_data)
