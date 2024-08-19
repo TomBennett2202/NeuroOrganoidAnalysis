@@ -1,18 +1,20 @@
-% Nuclei mask files
+% Script to select objects in images and save them into folders nuclei,
+% non_mitotic_nuclei, miscellaneous.
+
+% Nuclei mask directory
 nuclei_directory = 'nuclei_masks';
-nuclei_mask_files = dir(fullfile(nuclei_directory, '*.png'));
 
 % Original image files
 images_directory = 'images';
 image_files = dir(fullfile(images_directory, '*.jpg'));
 
 % Loop through each file in the directory
-for i = 1:numel(nuclei_mask_files)
+for i = 1:numel(image_files)
     % Get the file name without extension
-    [~, filename, ~] = fileparts(nuclei_mask_files(i).name);
+    [~, filename, ~] = fileparts(image_files(i).name);
     
     % Read the corresponding nuclei mask image
-    nuclei_mask = imread(fullfile(nuclei_directory, nuclei_mask_files(i).name));
+    nuclei_mask = imread(fullfile(nuclei_directory, image_files(i).name));
 
     % Remove nuclei touching the borders
     nuclei_mask = removeBorders(nuclei_mask);

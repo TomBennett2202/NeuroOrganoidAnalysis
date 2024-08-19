@@ -7,18 +7,22 @@ function selectAndSaveNuclei(current_image, nuclei_mask, nucleus_type)
     
     [x, y] = getpts; % Get points selected by the user
     
-    % Initialize an array to store the indices of selected nuclei
+    % Initialise an array to store the indices of selected nuclei
     selected_nuclei_indices = [];
     
     % Loop through the clicked points and determine the corresponding nuclei
     for j = 1:numel(x)
+
         clicked_point = [x(j), y(j)];
+
         % Get nucleus index for the point
         nucleus_idx = nuclei_mask(round(clicked_point(2)), round(clicked_point(1)));
+        
         % Check it is not background
         if nucleus_idx > 0
             selected_nuclei_indices = [selected_nuclei_indices; nucleus_idx];
         end
+
     end
     
     % Create the parent folder to save the nuclei images if it doesn't exist
@@ -32,9 +36,11 @@ function selectAndSaveNuclei(current_image, nuclei_mask, nucleus_type)
         case 'mitotic'
             subfolder = fullfile(parent_folder, 'mitotic_nuclei');
             prefix = 'mitotic_nucleus';
+
         case 'non_mitotic'
             subfolder = fullfile(parent_folder, 'non_mitotic_nuclei');
             prefix = 'non_mitotic_nucleus';
+
         case 'miscellaneous'
             subfolder = fullfile(parent_folder, 'miscellaneous');
             prefix = 'miscellaneous';
@@ -50,6 +56,7 @@ function selectAndSaveNuclei(current_image, nuclei_mask, nucleus_type)
     
     % Save each selected nucleus as a separate image
     for j = 1:numel(selected_nuclei_indices)
+
         % Get the mask for the current nucleus
         nucleus_mask = nuclei_mask == selected_nuclei_indices(j);
         
@@ -72,5 +79,6 @@ function selectAndSaveNuclei(current_image, nuclei_mask, nucleus_type)
         
         % Save the masked image
         imwrite(resized_image, nucleus_filename);
+        
     end
 end

@@ -10,16 +10,20 @@ function correlationAnalysis(data, label)
     % Get variable names for the data
     vars = data.Properties.VariableNames;
 
-    % Check if there is a 7th column (lumen_classification) and exclude it
-    if numel(vars) >= 7 && strcmp(vars{7}, 'Organoid_Lumen_Classification')
-        vars = vars([1:6, 8:end]);
+    % Check if there is a 7th and 8th column (lumen_classification and nuclei classification) and exclude it
+    if numel(vars) == 8 
+        % Exclude the 7th column if there are 8 columns
+        vars = vars(1:6);
+    elseif numel(vars) == 7
+        % Exclude only the 7th column if there are 7 columns
+        vars = vars(1:6);
     end
 
     % Determine variable pairs based on the label
     if strcmp(label, 'combined')
         % Get variable names for organoids and nuclei
         organoid_vars = vars(1:6);
-        nuclei_vars = vars(8:end);
+        nuclei_vars = vars(7:12);
         pairs = combvec(1:numel(organoid_vars), 1:numel(nuclei_vars))';
     else
         % Get pairs for the same table
