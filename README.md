@@ -32,7 +32,7 @@ Upon running the pipeline, the following directories and files will be generated
 - **`uncorrelated/`**: Contains graphs for uncorrelated (p-value < 0.05) pairwise comparisons.
 - **`lumen_graphs/`**: Contains graphs comparing metrics for organoids and nuclei, distinguishing between organoids with and without lumens in the z-slice images.
 - **`mitotic_graphs/`**: Contains graphs comparing metrics for nuclei classified as mitotic, non-mitotic, or artefacts. This directory also includes the results, saved as a CSVs, of the ad-hoc tests for each metric comparison.
-- **`pca_graphs/`**: Contains the results of principal component analysis (PCA) performed on the extracted metrics, visualizing the dimensionality reduction.
+- **`pca_graphs/`**: Contains the results of principal component analysis (PCA) performed on the extracted metrics, visualising the dimensionality reduction.
 
 ## Training Your Own Model
 
@@ -43,7 +43,7 @@ If you wish to train your own model to classify mitotic nuclei, non-mitotic nucl
 1. **Nuclei Extraction**: 
    - Run the `nucleiExtraction.m` script.
    - The script will display images with pop-up prompts, asking you to manually select mitotic nuclei, non-mitotic nuclei, and artefacts.
-   - Selected nuclei will be saved to a directory named `nuclei_training`, organized into subdirectories: `mitotic_nuclei`, `non_mitotic_nuclei`, and `miscellaneous`.
+   - Selected nuclei will be saved to a directory named `nuclei_training`, organised into subdirectories: `mitotic_nuclei`, `non_mitotic_nuclei`, and `miscellaneous`.
 
 2. **Model Training**:
    - Run the `mitoticTraining.m` script to train the model using the images saved during the nuclei extraction process.
