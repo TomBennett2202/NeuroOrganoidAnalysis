@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-## Clone the project
+### Clone the project
 
 ```bash
   git clone https://github.com/TomBennett2202/NeuroOrganoidAnalysis/tree/main
