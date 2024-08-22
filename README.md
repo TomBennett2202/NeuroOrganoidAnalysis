@@ -2,6 +2,12 @@
 
 ## Getting Started
 
+## Clone the project
+
+```bash
+  git clone https://github.com/TomBennett2202/NeuroOrganoidAnalysis/tree/main
+```
+
 ### Running the Pipeline
 
 The main script to execute the entire pipeline is `main.m`. Ensure that your directory structure and input files are organised as follows within the cloned GitHub folder named `NeuroOrganoidAnalysis`:
