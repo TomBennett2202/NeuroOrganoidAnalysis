@@ -1,5 +1,13 @@
 # NeuroOrganoidAnalysis
 
+To address the rising prevalence of neurological disorders, gaining a deeper understanding of early brain development is essential for uncovering underlying causes and developing effective treatments. Brain organoids have emerged as an invaluable tool for modeling early human brain development with greater accuracy than traditional methods. To further this research, a pipeline was developed that integrates traditional descriptors with deep learning techniques to quantify organoid architecture and behavior.
+
+This pipeline meticulously extracts a wide range of parameters, including area, eccentricity, circularity, solidity, and mean intensity for both whole organoids and nuclei. It also captures the number of nuclei within each organoid and their distance from the organoid's center. Following data extraction, the pipeline conducts extensive statistical analyses to uncover meaningful patterns.
+
+Initially, a pairwise correlation analysis is performed to reveal significant relationships among the organoid and nuclei metrics. This is followed by a comparative analysis of these metrics in organoids with and without lumens. To further refine the analysis, principal component analysis (PCA) is utilised to reduce the dimensionality of the metrics, aiding in the identification of distinct patterns and relationships.
+
+Moreover, the pipeline explores cell proliferation within the organoids by employing a convolutional neural network (CNN) to identify mitotic nuclei, non-mitotic nuclei, and artefacts—hypothesised to be apoptotic cells. These classifications are then used to compare the metrics associated with mitotic and non-mitotic nuclei, as well as the recognised artefacts, providing deeper insights into the cellular dynamics within the organoids.
+
 ## Getting Started
 
 ### Clone the project
