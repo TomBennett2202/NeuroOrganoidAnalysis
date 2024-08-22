@@ -39,7 +39,7 @@ Upon running the pipeline, the following directories and files will be generated
 If you wish to train your own model to classify mitotic nuclei, non-mitotic nuclei, and artefacts, follow these steps:
 
 1. **Prepare Input Directories**:
-   - Ensure you have the `nuclei_masks/` and `images/` directories set up with your nuclei masks and organoid images. 
+   - Ensure you have the `images/` and `nuclei_masks/` directories set up with your organoid images and corresponding nuclei masks. 
 
 2. **Nuclei Extraction**: 
    - Run the `nucleiExtraction.m` script.
